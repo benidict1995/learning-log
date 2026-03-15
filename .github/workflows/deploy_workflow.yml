@@ -1,0 +1,36 @@
+name: Merge Develop to Main
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:  [opened, sychronized, reopened]
+
+jobs:
+  check-pr: 
+    if: github.base_ref == 'main' && github.head_ref == 'develop'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          python manage.py test
+
+      - name: Display PR info
+        run: |
+          echo "PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+          echo "From branch: ${{ github.head_ref }}"
+          echo "To branch: ${{ github.base_ref }}"
